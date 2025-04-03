@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Tic Tac Toe</h1>
+    <div id="board"></div>
+    <button onclick="resetGame()">Reset</button>
+
+    <script>
+        let board = [["_", "_", "_"], ["_", "_", "_"], ["_", "_", "_"]];
+        
+        function makeMove(row, col) {
+            if (board[row][col] !== "_") return;
+            board[row][col] = "X";  // Player move
+            updateBoard();
+
+            fetch("/move", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ board: board })
+            })
+            .then(response => response.json())
+            .then(data => {
+                board[data.row][data.col] = "O";  // AI move
+                updateBoard();
+            });
+        }
+
+        function updateBoard() {
+            let boardDiv = document.getElementById("board");
+            boardDiv.innerHTML = "";
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    let cell = document.createElement("div");
+                    cell.className = "cell";
+                    cell.innerText = board[i][j] === "_" ? "" : board[i][j];
+                    cell.onclick = () => makeMove(i, j);
+                    boardDiv.appendChild(cell);
+                }
+            }
+        }
+
+        function resetGame() {
+            board = [["_", "_", "_"], ["_", "_", "_"], ["_", "_", "_"]];
+            updateBoard();
+        }
+
+        updateBoard();
+    </script>
+</body>
+</html>

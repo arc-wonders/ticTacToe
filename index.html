@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            justify-content: center;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            border: 2px solid black;
+            cursor: pointer;
+        }
+        .cell.taken {
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tic Tac Toe AI</h1>
+    <div class="board" id="board"></div>
+    <p id="status">Your Turn</p>
+    <script>
+        const boardElement = document.getElementById("board");
+        const statusElement = document.getElementById("status");
+        let board = [["_", "_", "_"], ["_", "_", "_"], ["_", "_", "_"]];
+        
+        function renderBoard() {
+            boardElement.innerHTML = "";
+            board.forEach((row, i) => {
+                row.forEach((cell, j) => {
+                    const cellElement = document.createElement("div");
+                    cellElement.classList.add("cell");
+                    if (cell !== "_") cellElement.classList.add("taken");
+                    cellElement.textContent = cell === "_" ? "" : cell;
+                    cellElement.addEventListener("click", () => makeMove(i, j));
+                    boardElement.appendChild(cellElement);
+                });
+            });
+        }
+        
+        function makeMove(i, j) {
+            if (board[i][j] !== "_") return;
+            board[i][j] = "X";
+            renderBoard();
+            statusElement.textContent = "AI is thinking...";
+            fetchAI();
+        }
+        
+        function fetchAI() {
+            fetch("http://localhost:5000")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.row !== -1 && data.col !== -1) {
+                        board[data.row][data.col] = "O";
+                    }
+                    renderBoard();
+                    statusElement.textContent = "Your Turn";
+                });
+        }
+        
+        renderBoard();
+    </script>
+</body>
+</html>
